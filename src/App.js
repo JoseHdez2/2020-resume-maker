@@ -1,22 +1,29 @@
 import React, { useState } from "react";
 import styled from "styled-components";
 import {
+  MyRow0,
   MyRow,
   MyButton,
   MyButtonToggle,
   MyList
 } from "./components/my-components";
-import { Container, Row, Jumbotron } from "react-bootstrap";
+import { MyContEdit } from "./components/my-experiments";
+import { MyListAppendableCard } from "./components/my-lists";
+import { Card, Container, Row, Jumbotron } from "react-bootstrap";
 import "./styles.css";
+import { jsPDF } from "jspdf";
 
 const initialData = {
   skills: [{ id: 1, name: "Kotlin", desc: "good" }],
-  profiles: []
+  profiles: [{ id: 1000, name: "Frontend" }, { id: 1001, name: "Backend" }]
 };
 
 export default function App() {
   const [skills, setSkills] = useState(initialData.skills || []);
   const [profiles, setProfiles] = useState(initialData.profiles || []);
+  const [fruit, setFruit] = useState("");
+
+  const addSkill = () => setSkills([...skills, { id: 0, name: "New" }]);
 
   return (
     <Container fluid style={{ padding: "30px" }} className="App">
@@ -29,45 +36,52 @@ export default function App() {
           </p>
         </Jumbotron>
       </Row>
-      <MyRow components={[<p>1</p>, <p>2</p>]} />
-      <ListSkills skills={skills} />
+      <MyRow0
+        components={[
+          <span>{fruit || "---"}</span>,
+          <MyButtonToggle
+            getter={fruit}
+            setter={setFruit}
+            values={["apple", "banana", "coconut"]}
+          />
+        ]}
+      />
+      <MyListAppendableCard
+        title={"Skills"}
+        elems={skills}
+        addElem={addSkill}
+        mappingFn={s => <Skill skill={s} />}
+      />
       <Row />
       <Row>
         <hr style={{ margin: "10px" }} />
       </Row>
       <Row>
         <MyButton text="Save" />
-        <MyButton text="Export to PDF" />
+        <MyButton text="Export to PDF" onClick={exportToPdf} />
         <MyButton text="Export to JSON" />
       </Row>
     </Container>
   );
 }
 
-const DivSkills = styled.div`
-  border-style: solid;
-  border-width: 1px;
-  border-color: black;
-`;
-
-const MySubtitle = styled.h2`
-  color: white;
-  background-color: gray;
-  border-style: solid;
-  border-width: 1px;
-  border-color: black;
-`;
-
 const ListSkills = ({ skills }) => (
-  <DivSkills>
-    <MySubtitle>Skills</MySubtitle>
+  <Card style={{ padding: "10px" }}>
+    <h2>Skills</h2>
     <MyList elems={skills} mappingFn={s => <Skill skill={s} />} />
     <MyButton text="+" />
-  </DivSkills>
+  </Card>
 );
 
 const Skill = ({ skill }) => (
-  <span key={skill.id}>
+  <div key={skill.id}>
     {skill.name}: {skill.desc}
-  </span>
+  </div>
 );
+
+const exportToPdf = () => {
+  var doc = new jsPDF();
+
+  doc.text("Hello world!", 10, 10);
+  doc.save("a4.pdf");
+};

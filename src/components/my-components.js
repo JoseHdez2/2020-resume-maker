@@ -1,10 +1,25 @@
 import React, { useState } from "react";
-import { Row, Col, Alert, Button, ListGroup } from "react-bootstrap";
+import {
+  Row,
+  Col,
+  Alert,
+  Button,
+  ButtonGroup,
+  ListGroup
+} from "react-bootstrap";
 
 // is this dangerous?
-export const MyRow = ({ components }) => (
+export const MyRow0 = ({ components }) => (
   <Row>
     {components.map(c => (
+      <Col>{c}</Col>
+    ))}
+  </Row>
+);
+
+export const MyRow = props => (
+  <Row>
+    {props.children.map(c => (
       <Col>{c}</Col>
     ))}
   </Row>
@@ -32,18 +47,19 @@ export const MyButton = ({
 );
 
 // https://react-bootstrap.github.io/components/button-group/
-export const MyButtonToggle = ({ getter, setter, values }) => {
+export const MyButtonToggle = ({ getter, setter, values }) => (
   <ButtonGroup>
     {values.map(v => (
-      <MyButton
-        text={v}
+      <Button
         onClick={() => setter(v)}
         variant={v === getter ? "primary" : "secondary"}
         disabled={v === getter}
-      />
+      >
+        {v}
+      </Button>
     ))}
-  </ButtonGroup>;
-};
+  </ButtonGroup>
+);
 
 // https://react-bootstrap.github.io/components/list-group/
 // Most common usage of ListGroup.
