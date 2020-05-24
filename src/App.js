@@ -6,7 +6,7 @@ import {
   MyButtonToggle,
   MyList
 } from "./components/my-components";
-import { Container, Row, Col, Button, Jumbotron } from "react-bootstrap";
+import { Container, Row, Jumbotron } from "react-bootstrap";
 import "./styles.css";
 
 const initialData = {
