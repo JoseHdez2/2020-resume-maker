@@ -10,6 +10,18 @@ import {
 } from "react-bootstrap";
 import { MyButton, MyList } from "./my-components";
 
+export const MyListFiltered = ({elems, mappingFn, filterFn}) => {
+  const [filter, setFilter] = useState("")
+  <span>
+    <input>{filter}</input>
+    <MyList elems={elems.filter(filterFn)} mappingFn={mappingFn} />
+  </span>
+}
+
+export const MyInput = ({value, setValue}) => (
+  <input>{value}</input>
+)
+
 export const MyListAppendableCard = ({ title, elems, addElem, mappingFn }) => (
   <Card style={{ padding: "10px" }}>
     <h2>{title}</h2>
