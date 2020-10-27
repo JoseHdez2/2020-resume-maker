@@ -1,60 +1,73 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import styled from "styled-components";
-import {
-  MyRow0,
-  MyRow,
-  MyButton,
-  MyButtonToggle,
-  MyList
-} from "./components/my-components";
-import { MyContEdit } from "./components/my-experiments";
-import { MyListAppendableCard } from "./components/my-lists";
-import { Card, Container, Row, Jumbotron } from "react-bootstrap";
+import { MyButton, MyList } from "./components/my-components";
+import { FixedSizeList } from "./components/my-virtual-lists";
+import ContentEditable from "react-contenteditable";
+import { Row, Col, Badge, Card, Container, Jumbotron } from "react-bootstrap";
 import "./styles.css";
 import { jsPDF } from "jspdf";
-
-const initialData = {
-  skills: [{ id: 1, name: "Kotlin", desc: "good" }],
-  profiles: [{ id: 1000, name: "Frontend" }, { id: 1001, name: "Backend" }]
-};
+import { Draggable, Droppable, DragDropContext } from "react-beautiful-dnd";
+import kanji from "./data/kanji";
+// import kanji200 from "./data/0200";
+import { WithVirtualList } from "./components/with-virtual-list";
+import { useHandleContentEditable } from "./hooks/my-hooks";
 
 export default function App() {
-  const [skills, setSkills] = useState(initialData.skills || []);
-  const [profiles, setProfiles] = useState(initialData.profiles || []);
-  const [fruit, setFruit] = useState("");
+  const [users, setUsers] = useState([
+    { id: "1", name: "Paco" },
+    { id: "2", name: "Pepe" },
+    { id: "3", name: "Julián" }
+  ]);
 
-  const addSkill = () => setSkills([...skills, { id: 0, name: "New" }]);
+  const updateUsers = user => {
+    setUsers([...users.map(u => (u.id === user.id ? user : u))]);
+  };
+
+  const handleDragEnd = result => {};
 
   return (
     <Container fluid style={{ padding: "30px" }} className="App">
       <Row>
         <Jumbotron>
-          <h1>Resume Maker</h1>
+          <h1>Learn Kanji</h1>
           <p>
-            Tool for editing and exporting a resume. Will support styling,
-            profiles and exporting to several formats.
+            Tool for learning and remembering kanji. Will support searching by
+            primitive, and exporting to JSON and PDF.
           </p>
         </Jumbotron>
       </Row>
-      <MyRow0
-        components={[
-          <span>{fruit || "---"}</span>,
-          <MyButtonToggle
-            getter={fruit}
-            setter={setFruit}
-            values={["apple", "banana", "coconut"]}
-          />
-        ]}
-      />
-      <MyListAppendableCard
-        title={"Skills"}
-        elems={skills}
-        addElem={addSkill}
-        mappingFn={s => <Skill skill={s} />}
-      />
-      <Row />
       <Row>
-        <hr style={{ margin: "10px" }} />
+        <Col>
+          <Row>
+            {/*             <DragDropContext onDragEnd={handleDragEnd}> */}
+            {/* <Droppable droppableId={1}> */}
+            {provided => (
+              <WithVirtualList
+                elems={users}
+                innerRef={provided.innerRef}
+                {...provided.droppableProps}
+              >
+                {element => (
+                  // <Draggable draggableId={element.id}>
+                  <User
+                    user={element}
+                    users={users}
+                    updateUsers={updateUsers}
+                  />
+                  // </Draggable>
+                )}
+              </WithVirtualList>
+            )}
+            {/*               </Droppable>
+            </DragDropContext> */}
+          </Row>
+          <Row>{JSON.stringify(users)}</Row>
+        </Col>
+        <Col>
+          <WithVirtualList elems={kanji}>
+            {element => <Kanji kanji={element} />}
+          </WithVirtualList>
+        </Col>
       </Row>
       <Row>
         <MyButton text="Save" />
@@ -65,19 +78,31 @@ export default function App() {
   );
 }
 
-const ListSkills = ({ skills }) => (
-  <Card style={{ padding: "10px" }}>
-    <h2>Skills</h2>
-    <MyList elems={skills} mappingFn={s => <Skill skill={s} />} />
-    <MyButton text="+" />
-  </Card>
+const IdSpan = styled.span`
+  font-size: xx-small;
+`;
+
+const Kanji = ({ kanji }) => (
+  <>
+    <IdSpan>{kanji.id}</IdSpan> <Badge variant="secondary">{kanji.kanji}</Badge>{" "}
+    <span>{kanji.name}</span>
+  </>
 );
 
-const Skill = ({ skill }) => (
-  <div key={skill.id}>
-    {skill.name}: {skill.desc}
-  </div>
-);
+const User = ({ user, updateUsers }) => {
+  const [text, handleChange, handleKeyDown] = useHandleContentEditable(
+    user,
+    updateUsers
+  );
+
+  return (
+    <ContentEditable
+      html={text.current}
+      onKeyDown={handleKeyDown}
+      onChange={handleChange}
+    />
+  );
+};
 
 const exportToPdf = () => {
   var doc = new jsPDF();
